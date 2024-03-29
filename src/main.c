@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-#include "qflogger.h"
+#include "qfclogger.h"
 
 int main() {
     printf("Hello, World!\n");
-    qfLog("The logger works!");
+    qfcLog("The logger works!");
     return 0;
 }

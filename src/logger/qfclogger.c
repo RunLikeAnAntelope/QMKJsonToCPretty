@@ -1,4 +1,4 @@
-#include "qflogger.h"
+#include "qfclogger.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -6,7 +6,7 @@
 
 #define LOG_LOCATION "QMKJsonToCPretty.log"
 
-void qfSaveToFile(const char* fmt, ...) {
+void qfcSaveToFile(const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     FILE* fptr;
@@ -22,4 +22,4 @@ void qfSaveToFile(const char* fmt, ...) {
     va_end(ap);
 }
 
-void qfLog(const char* logMsg) { qfSaveToFile("%s\n", logMsg); }
+void qfcLog(const char* logMsg) { qfcSaveToFile("%s\n", logMsg); }
