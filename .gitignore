@@ -54,3 +54,6 @@ dkms.conf
 # Test Files
 test.txt
 .vscode
+
+# Build files
+build/
