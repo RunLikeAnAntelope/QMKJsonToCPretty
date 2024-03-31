@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,7 +42,32 @@ void qfcReadFile(char *fileName) {
 // Just getting pointer to start of layer for now
 void extractLayers(char *input) {
   char *startPtr = strstr(input, "\"layers\"");
-  printf(startPtr);
+  if (startPtr == NULL) {
+    printf("Json must have a \"layers\" element");
+    exit(1);
+  }
+
+  startPtr = strchr(startPtr, '[');
+  if (startPtr == NULL) {
+    printf("Json malformed\n");
+    exit(1);
+  }
+
+  bool in_str = false;
+  int bracket_cntr = 1;
+  size_t len = 1;
+
+  while (bracket_cntr != 0) {
+    if (startPtr[len] == '[') {
+      bracket_cntr += 1;
+    } else if (startPtr[len] == ']') {
+      bracket_cntr -= 1;
+    }
+    len += 1;
+  }
+
+  // Todo: change from in place to copy to own string
+  startPtr[len] = '\0';
 }
 int main(int argc, char *argv[]) {
   if (argc >= 2) {
