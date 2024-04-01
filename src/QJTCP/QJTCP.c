@@ -52,18 +52,19 @@ char *extractLayers(char *input) {
   char *startPtr = strstr(input, "\"layers\"");
   if (startPtr == NULL) {
     printf("Json must have a \"layers\" element");
-    exit(1);
+    return NULL;
   }
 
   startPtr = strchr(startPtr, '[');
   if (startPtr == NULL) {
     printf("Json malformed\n");
-    exit(1);
+    return NULL;
   }
 
   int bracket_cntr = 1;
   size_t len = 1;
 
+  // TODO: Fix segfault here
   RESET_TIMEOUT();
   while (bracket_cntr != 0 && !TIMED_OUT) {
     if (startPtr[len] == '[') {
@@ -74,10 +75,14 @@ char *extractLayers(char *input) {
     len += 1;
   }
 
+  if (bracket_cntr != 0) {
+    printf("Unbalanced brackets in your layers entry.\n");
+    return NULL;
+  }
+
   char *layers = malloc(len + 1);
   strncpy(layers, startPtr, len);
   layers[len] = '\0';
-  printf(layers);
   return layers;
 }
 

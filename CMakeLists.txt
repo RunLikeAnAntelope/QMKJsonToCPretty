@@ -27,10 +27,19 @@ add_executable(QmkFormatConverter src/main.c)
 target_link_libraries(QmkFormatConverter PUBLIC ${LIBS})
 target_include_directories(QmkFormatConverter PUBLIC ${SUBDIRS})
 
+# Unit Tests
 add_executable(Test test/test.c)
 target_link_libraries(Test PUBLIC ${LIBS})
 target_include_directories(Test PUBLIC ${SUBDIRS})
 
+enable_testing()
+add_test(NAME Tests COMMAND Test)
 
-
+add_custom_command(
+     TARGET Test
+     COMMENT "Run tests"
+     POST_BUILD 
+     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+     COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> -R "^Test$" --output-on-failures
+)
 
