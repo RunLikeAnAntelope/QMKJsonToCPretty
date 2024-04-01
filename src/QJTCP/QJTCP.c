@@ -66,7 +66,7 @@ char *extractLayers(char *input) {
 
   // TODO: Fix segfault here
   RESET_TIMEOUT();
-  while (bracket_cntr != 0 && !TIMED_OUT) {
+  while (bracket_cntr != 0 && startPtr[len] != '\0') {
     if (startPtr[len] == '[') {
       bracket_cntr += 1;
     } else if (startPtr[len] == ']') {

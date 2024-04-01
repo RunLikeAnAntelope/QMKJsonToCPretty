@@ -18,13 +18,12 @@ int test_extractLayers() {
     return 0;
   }
 
-  // TODO: Enable test after fixing segfault
-  /*   // Test that lack of closing bracket exits eventually
-    test = extractLayers("\"layers\": [\"hello\", \"one\"");
-    if (test != NULL) {
-      printf("Failed extractLayers test 3\n");
-      return 0;
-    } */
+  // Test that lack of closing bracket exits eventually
+  test = extractLayers("\"layers\": [\"hello\", \"one\"");
+  if (test != NULL) {
+    printf("Failed extractLayers test 3\n");
+    return 0;
+  }
 
   return 1;
 }
