@@ -5,16 +5,32 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_FLAGS_DEBUG "-Wall -Wextra -pedantic -std=gnu17 -g")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+set(SUBDIRS
+    ${PROJECT_SOURCE_DIR}/src/logger
+    ${PROJECT_SOURCE_DIR}/src/QJTCP
+)
+
+set(INCLUDE_DIRS
+    "${PROJECT_SOURCE_DIR}/src/logger"
+    "${PROJECT_SOURCE_DIR}/src/QJTCP"
+)
+
+set(LIBS 
+    "QfcLogger"
+    "QJTCP"
+)
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/logger)
-add_subdirectory(${PROJECT_SOURCE_DIR}/src/QJTCP)
+add_subdirectory( ${PROJECT_SOURCE_DIR}/src/QJTCP)
 
 add_executable(QmkFormatConverter src/main.c)
+target_link_libraries(QmkFormatConverter PUBLIC ${LIBS})
+target_include_directories(QmkFormatConverter PUBLIC ${SUBDIRS})
 
-target_link_libraries(QmkFormatConverter PUBLIC QfcLogger QJTCP )
-target_include_directories(QJTCP PUBLIC
-                          "${PROJECT_SOURCE_DIR}/src/logger"
-                          "${PROJECT_SOURCE_DIR}/src/QJTCP"
-                          )
+add_executable(Test test/test.c)
+target_link_libraries(Test PUBLIC ${LIBS})
+target_include_directories(Test PUBLIC ${SUBDIRS})
+
 
 
 
