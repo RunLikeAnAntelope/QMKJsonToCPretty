@@ -16,13 +16,7 @@ typedef struct substring {
   ssize_t endIndex;
 } substring;
 
-typedef struct layers {
-  char **layers;
-} layers;
-
 struct chars input_file;
-
-layers kb_layers;
 
 void qfcReadFile(char *fileName) {
   FILE *fptr = fopen(fileName, "r");
@@ -54,22 +48,24 @@ void qfcReadFile(char *fileName) {
 }
 
 // Returns new string with just the layers. Callee reponsible for freeing.
-char *extractLayers(char *input) {
+layers extractLayers(char *input) {
+  struct layers kb_layers = {NULL, 0};
+
   char *startPtr = strstr(input, "\"layers\"");
   if (startPtr == NULL) {
     printf("Json must have a \"layers\" element");
-    return NULL;
+    return kb_layers;
   }
 
   startPtr = strchr(startPtr, '[');
   if (startPtr == NULL) {
     printf("Json malformed\n");
-    return NULL;
+    return kb_layers;
   }
   int bracket_cntr = 1;
   size_t len = 1;
 
-  substring *layers = NULL;
+  substring *all_layers = NULL;
   size_t num_layers = 0;
   bool in_layer = false;
 
@@ -87,11 +83,11 @@ char *extractLayers(char *input) {
     if (!in_layer && bracket_cntr == 2) {
       in_layer = true;
       num_layers += 1;
-      layers = realloc(layers, sizeof(substring) * num_layers);
-      layers[num_layers - 1].startIndex = len;
+      all_layers = realloc(all_layers, sizeof(substring) * num_layers);
+      all_layers[num_layers - 1].startIndex = len;
     } else if (in_layer && bracket_cntr == 1) {
       in_layer = false;
-      layers[num_layers - 1].endIndex = len;
+      all_layers[num_layers - 1].endIndex = len;
     }
 
     len += 1;
@@ -99,32 +95,25 @@ char *extractLayers(char *input) {
 
   if (bracket_cntr != 0) {
     printf("Unbalanced brackets in your layers entry.\n");
-    return NULL;
+    return kb_layers;
   }
 
   kb_layers.layers = malloc(sizeof(char *) + num_layers);
 
   unsigned long i = 0;
   for (i = 0; i < num_layers; i++) {
-    kb_layers.layers[i] = malloc(layers[i].endIndex - layers[i].startIndex + 2);
     kb_layers.layers[i] =
-        memcpy(kb_layers.layers[i], &startPtr[layers[i].startIndex],
-               layers[i].endIndex - layers[i].startIndex + 1);
-    kb_layers.layers[i][layers[i].endIndex - layers[i].startIndex + 1] = '\0';
+        malloc(all_layers[i].endIndex - all_layers[i].startIndex + 2);
+    kb_layers.layers[i] =
+        memcpy(kb_layers.layers[i], &startPtr[all_layers[i].startIndex],
+               all_layers[i].endIndex - all_layers[i].startIndex + 1);
+    kb_layers.layers[i][all_layers[i].endIndex - all_layers[i].startIndex + 1] =
+        '\0';
   }
 
-  // debugging printing. Delete
-  for (i = 0; i < num_layers; i++) {
-    printf("++++++++++++++++++++++++++++++++\n");
-    printf(kb_layers.layers[i]);
-    printf("++++++++++++++++++++++++++++++++\n");
-  }
+  kb_layers.num_layers = num_layers;
 
-  // Remove rest of file. This is old. Need to fix unit tests
-  char *layers1 = malloc(len + 1);
-  strncpy(layers1, startPtr, len);
-  layers1[len] = '\0';
-  return layers1;
+  return kb_layers;
 }
 
 void run(char *filename) {
