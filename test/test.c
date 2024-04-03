@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "QJTCP.h"
@@ -13,7 +12,7 @@ int layersTest1() {
     }
     return 1;
 }
-int layersTest2() {  // Test that a input without a layers input returns null
+int layersTest2() { // Test that a input without a layers input returns null
     layers test = extractLayers("[\"hello\", \"one\"]");
     if (test.num_layers != 0) {
         printf("Json with no layers should fail\n");
@@ -21,7 +20,7 @@ int layersTest2() {  // Test that a input without a layers input returns null
     }
     return 1;
 }
-int layersTest3() {  // Test that lack of closing bracket exits eventually
+int layersTest3() { // Test that lack of closing bracket exits eventually
     layers test = extractLayers("\"layers\": [\"hello\", \"one\"");
     if (test.num_layers != 0) {
         printf("Failed extractLayers test 3\n");
@@ -50,7 +49,7 @@ int layersTest4() {
 }
 
 int extractRowTest1() {
-    char* test_input = "[\"hello\", \"two\"]";
+    char *test_input = "[\"hello\", \"two\"]";
     row extracted_row = extractRow(test_input);
 
     if (extracted_row.num_elems != 2) {

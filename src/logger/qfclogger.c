@@ -6,10 +6,10 @@
 
 #define LOG_LOCATION "QMKJsonToCPretty.log"
 
-void qfcSaveToFile(const char* fmt, ...) {
+void qfcSaveToFile(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    FILE* fptr;
+    FILE *fptr;
 
     fptr = fopen(LOG_LOCATION, "a");
     if (fptr == NULL) {
@@ -22,4 +22,4 @@ void qfcSaveToFile(const char* fmt, ...) {
     va_end(ap);
 }
 
-void qfcLog(const char* logMsg) { qfcSaveToFile("%s\n", logMsg); }
+void qfcLog(const char *logMsg) { qfcSaveToFile("%s\n", logMsg); }

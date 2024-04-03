@@ -1,3 +1,3 @@
 #pragma once
 
-void qfcLog(const char* logMsg);
+void qfcLog(const char *logMsg);
