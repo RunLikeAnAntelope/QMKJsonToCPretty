@@ -7,27 +7,19 @@
 // #include "qfclogger.h"
 
 #define MAX_LAYERS 20
-struct chars {
-    ssize_t size;
-    char *chars;
-};
 
 typedef struct substring {
     ssize_t startIndex;
     ssize_t endIndex;
 } substring;
 
-struct chars input_file;
+chars qfcReadFile(char *fileName) {
+    chars output = {0, NULL};
 
-void qfcReadFile(char *fileName) {
     FILE *fptr = fopen(fileName, "r");
     if (!fptr) {
         printf("Failed to open %s", fileName);
     }
-
-    // full file as an array
-    input_file.chars = NULL;
-    input_file.size = 0;
 
     // used for reading in lines
     char *line = NULL;
@@ -35,18 +27,16 @@ void qfcReadFile(char *fileName) {
     ssize_t line_len = 0;
 
     while ((line_len = getline(&line, &len, fptr)) != -1) {
-        input_file.chars =
-            realloc(input_file.chars, input_file.size + line_len);
-        memcpy(&input_file.chars[input_file.size], line, line_len);
-        input_file.size += line_len;
+        output.chars = realloc(output.chars, output.size + line_len);
+        memcpy(&output.chars[output.size], line, line_len);
+        output.size += line_len;
     }
     free(line);
     fclose(fptr);
 
-    // terminate string
-    input_file.size += 1;
-    input_file.chars = realloc(input_file.chars, input_file.size);
-    input_file.chars[input_file.size - 1] = '\0';
+    output.chars[output.size - 1] = '\0';
+
+    return output;
 }
 
 // Returns new string with just the layers. Callee reponsible for freeing.
@@ -154,36 +144,28 @@ split_layers extractSplitLayers(layers l) {
     split_layers slt_layers;
     slt_layers.rows = malloc(sizeof(layer) * l.num_layers);
     slt_layers.num_rows = l.num_layers;
-    int i = 0;
+    unsigned int i = 0;
     for (i = 0; i < l.num_layers; i++) {
         slt_layers.rows[i] = extractLayer(l.layers[i]);
     }
     return slt_layers;
 }
 
-void freeLayers(layers l) {
-    int i = 0;
-    for (i = 0; i < l.num_layers; i++) {
-        free(l.layers[i]);
-    }
-
-    free(l.layers);
-}
-
 bool splitLayersInvalid(split_layers sl) {
     unsigned int layer_len = sl.rows[0].num_elems;
-    int i;
+    unsigned int i;
+
     for (i = 1; i < sl.num_rows; i++) {
         if (sl.rows[i].num_elems != layer_len) {
             printf("Error. All layers need to be the same length\n");
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 int largestElemInLayer(layer l) {
-    int i;
+    unsigned int i;
     int max_length = 0;
     for (i = 0; i < l.num_elems; i++) {
         int new_len = strlen(l.elems[i]);
@@ -194,20 +176,82 @@ int largestElemInLayer(layer l) {
     return max_length;
 }
 
-int run(char *filename) {
-    qfcReadFile(filename);
+void appString(char *st, char *app) {
+    int new_length = strlen(st) + strlen(app) + 1;
+    st = realloc(st, new_length);
+    memcpy(&st[strlen(st)], app, strlen(app));
+    st[new_length - 1] = '\0';
+}
+int printLayer(layer l, chars config) {
+    int spaceTaken = largestElemInLayer(l) + 2;
+    int i = 0;
+    unsigned int elem_counter = 0;
+    char *str = malloc(sizeof(char *));
+
+    while (config.chars[i] != '\0') {
+        if (elem_counter >= l.num_elems) {
+            printf(
+                "Error. There are more elems in config file than actual elems, "
+                "or you have extra spaces at the end of your configfile.\n");
+            return 1;
+        }
+
+        switch (config.chars[i]) {
+        case 'X':
+            appString(str, l.elems[elem_counter]);
+            if (elem_counter < l.num_elems - 1) {
+                appString(str, ",");
+                for (int j = strlen(l.elems[elem_counter]) + 1; j < spaceTaken;
+                     j++) {
+                    appString(str, " ");
+                }
+            }
+            elem_counter += 1;
+            break;
+        case ' ':
+            for (int j = 0; j < spaceTaken; j++) {
+                appString(str, " ");
+            }
+            break;
+        case '\n':
+            appString(str, "\n    ");
+            break;
+        default:
+            printf("Error. Illegal charcter in config file. Only <space> <X> "
+                   "and <newline> supported\n");
+            return 1;
+        }
+        i++;
+    }
+
+    if (elem_counter != l.num_elems) {
+        printf("ERROR!!!!!!!!!!!! More elements in config file than defined in "
+               "input file.\n");
+        return 1;
+    }
+
+    // delete last comma
+    printf(str);
+    return 0;
+}
+
+int run(char *input_file_name, char *format_file_name) {
+    chars input_file = qfcReadFile(input_file_name);
+    chars format_file = qfcReadFile(format_file_name);
     layers my_layers = extractLayers(input_file.chars);
 
     if (my_layers.num_layers == 0) {
+        printf("ERROR");
         return 1;
     }
 
     split_layers slt_layers = extractSplitLayers(my_layers);
-    freeLayers(my_layers);
 
     if (splitLayersInvalid(slt_layers)) {
         return 1;
     }
+
+    printLayer(slt_layers.rows[0], format_file);
 
     return 0;
 }

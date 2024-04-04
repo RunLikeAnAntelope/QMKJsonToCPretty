@@ -1,4 +1,9 @@
 #pragma once
+#include <stdio.h>
+typedef struct chars {
+    ssize_t size;
+    char *chars;
+} chars;
 typedef struct layers {
     char **layers;
     unsigned int num_layers;
@@ -14,9 +19,9 @@ typedef struct split_layers {
     unsigned int num_rows;
 } split_layers;
 
-int run(char *filename);
+int run(char *input_file_name, char *format_file_name);
 layers extractLayers(char *input);
 layer extractLayer(char *raw_row);
 split_layers extractSplitLayers(layers l);
 void freeLayers(layers l);
-void qfcReadFile(char *filename);
+chars qfcReadFile(char *filename);
