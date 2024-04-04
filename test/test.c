@@ -50,7 +50,7 @@ int layersTest4() {
 
 int extractRowTest1() {
     char *test_input = "[\"hello\", \"two\"]";
-    row extracted_row = extractRow(test_input);
+    layer extracted_row = extractLayer(test_input);
 
     if (extracted_row.num_elems != 2) {
         return 0;

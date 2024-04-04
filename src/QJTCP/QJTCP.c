@@ -119,8 +119,9 @@ layers extractLayers(char *input) {
 
     return kb_layers;
 }
-row extractRow(char *raw_row) {
-    row ret_row = {NULL, 0};
+
+layer extractLayer(char *raw_row) {
+    layer ret_row = {NULL, 0};
 
     int i = 0;
     bool in_quote = false;
@@ -150,12 +151,16 @@ row extractRow(char *raw_row) {
     return ret_row;
 }
 split_layers extractSplitLayers(layers l) {
-    split_layers x;
+    split_layers slt_layers;
+    slt_layers.rows = malloc(sizeof(layer) * l.num_layers);
+    slt_layers.num_rows = l.num_layers;
     int i = 0;
     for (i = 0; i < l.num_layers; i++) {
+        slt_layers.rows[i] = extractLayer(l.layers[i]);
     }
-    return x;
+    return slt_layers;
 }
+
 void freeLayers(layers l) {
     int i = 0;
     for (i = 0; i < l.num_layers; i++) {
@@ -165,9 +170,44 @@ void freeLayers(layers l) {
     free(l.layers);
 }
 
-void run(char *filename) {
+bool splitLayersInvalid(split_layers sl) {
+    unsigned int layer_len = sl.rows[0].num_elems;
+    int i;
+    for (i = 1; i < sl.num_rows; i++) {
+        if (sl.rows[i].num_elems != layer_len) {
+            printf("Error. All layers need to be the same length\n");
+            return false;
+        }
+    }
+    return true;
+}
+
+int largestElemInLayer(layer l) {
+    int i;
+    int max_length = 0;
+    for (i = 0; i < l.num_elems; i++) {
+        int new_len = strlen(l.elems[i]);
+        if (new_len > max_length) {
+            max_length = new_len;
+        }
+    }
+    return max_length;
+}
+
+int run(char *filename) {
     qfcReadFile(filename);
-    extractLayers(input_file.chars);
-    char *test_input = "[\"hello\", \"two\"]";
-    row extracted_row = extractRow(test_input);
+    layers my_layers = extractLayers(input_file.chars);
+
+    if (my_layers.num_layers == 0) {
+        return 1;
+    }
+
+    split_layers slt_layers = extractSplitLayers(my_layers);
+    freeLayers(my_layers);
+
+    if (splitLayersInvalid(slt_layers)) {
+        return 1;
+    }
+
+    return 0;
 }

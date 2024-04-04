@@ -4,19 +4,19 @@ typedef struct layers {
     unsigned int num_layers;
 } layers;
 
-typedef struct row {
+typedef struct layer {
     char **elems;
     unsigned int num_elems;
-} row;
+} layer;
 
 typedef struct split_layers {
-    row *rows;
+    layer *rows;
     unsigned int num_rows;
 } split_layers;
 
-void run(char *filename);
+int run(char *filename);
 layers extractLayers(char *input);
-row extractRow(char *raw_row);
+layer extractLayer(char *raw_row);
 split_layers extractSplitLayers(layers l);
 void freeLayers(layers l);
 void qfcReadFile(char *filename);
