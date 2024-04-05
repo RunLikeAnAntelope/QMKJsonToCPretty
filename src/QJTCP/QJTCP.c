@@ -140,6 +140,7 @@ layer extractLayer(char *raw_row) {
     }
     return ret_row;
 }
+
 split_layers extractSplitLayers(layers l) {
     split_layers slt_layers;
     slt_layers.rows = malloc(sizeof(layer) * l.num_layers);
@@ -182,12 +183,13 @@ void appString(char *st, char *app) {
     memcpy(&st[strlen(st)], app, strlen(app));
     st[new_length - 1] = '\0';
 }
-int printLayer(layer l, chars config) {
+
+int printLayer(layer l, chars config, char *str) {
     int spaceTaken = largestElemInLayer(l) + 2;
     int i = 0;
     unsigned int elem_counter = 0;
-    char *str = malloc(sizeof(char *));
 
+    appString(str, "    ");
     while (config.chars[i] != '\0') {
         if (elem_counter >= l.num_elems) {
             printf(
@@ -230,7 +232,25 @@ int printLayer(layer l, chars config) {
         return 1;
     }
 
-    // delete last comma
+    return 0;
+}
+
+int printLayers(split_layers l, chars config) {
+    char *str = malloc(sizeof(char *));
+    for (unsigned int i = 0; i < l.num_rows; i++) {
+        appString(str, "  [");
+        char index_str[3];
+        sprintf(index_str, "%u", i);
+        appString(str, index_str);
+        appString(str, "]  = Layout(\n");
+        if (printLayer(l.rows[i], config, str) == 1) {
+            return 1;
+        }
+        appString(str, "\n  )");
+        if (i != l.num_rows - 1) {
+            appString(str, ",\n");
+        }
+    }
     printf(str);
     return 0;
 }
@@ -251,7 +271,7 @@ int run(char *input_file_name, char *format_file_name) {
         return 1;
     }
 
-    printLayer(slt_layers.rows[0], format_file);
+    printLayers(slt_layers, format_file);
 
     return 0;
 }
